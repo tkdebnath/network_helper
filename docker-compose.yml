@@ -1,0 +1,13 @@
+services:
+  network_helper:
+    image: network_helper:latest
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - env.env
+    volumes:
+      - ./database.db:/app/database.db
+      - ./tasks/templates:/app/tasks/templates
+      - ./app/static/prechecks:/app/app/static/prechecks
+    restart: unless-stopped

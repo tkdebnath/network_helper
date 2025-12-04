@@ -1,7 +1,7 @@
 [project]
 name = "network-helper"
 version = "0.1.0"
-description = "Add your description here"
+description = "A robust FastAPI-based application designed to automate the management and upgrading of Cisco IOS devices. This tool streamlines network operations by handling firmware upgrades, device information gathering, and pre-upgrade checks with concurrency control and safety mechanisms."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
