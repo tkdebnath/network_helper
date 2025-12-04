@@ -63,8 +63,8 @@ FULL_IOS_FILESIZE=1312262395
 FLASH_FREE_SPACE_THRESHOLD=7516192768
 
 # File Server URLs (Region specific)
-DEFAULT_HTTP_FILE_SERVER_URL="http://10.81.160.92/Cisco/C9XXX/cat9k_iosxe.17.12.05.SPA.bin"
-AMER_HTTP_FILE_SERVER_URL="http://192.168.5.73/Cisco/C9XXX/cat9k_iosxe.17.12.05.SPA.bin"
+DEFAULT_HTTP_FILE_SERVER_URL="http://x.x.x.x/Cisco/C9XXX/cat9k_iosxe.17.12.05.SPA.bin"
+AMER_HTTP_FILE_SERVER_URL="http://x.x.x.x/Cisco/C9XXX/cat9k_iosxe.17.12.05.SPA.bin"
 # Add other regions as needed (APAC, EMEA, etc.)
 
 # Webhooks
