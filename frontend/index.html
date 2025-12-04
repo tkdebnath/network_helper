@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Helper</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Network Helper - Switch Upgrade</h1>
+
+        <div class="card">
+            <h2>Precheck Operations</h2>
+            <div class="form-group">
+                <label for="deviceName">Device Name:</label>
+                <input type="text" id="deviceName" placeholder="e.g., switch-01" list="deviceSuggestions">
+                <datalist id="deviceSuggestions"></datalist>
+                <button onclick="fetchPrechecks()">Fetch Checks</button>
+            </div>
+            <div id="triggerMessage"></div>
+
+            <div id="precheckListContainer" style="display:none; margin-top: 20px;">
+                <h3>Previous Checks</h3>
+                <ul id="precheckList" style="list-style: none; padding: 0;"></ul>
+                <div id="precheckActions" style="display:none; margin-top: 10px;">
+                    <button onclick="compareFiles()">Compare Selected (2)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Active Queue</h2>
+            <ul id="queueList"></ul>
+        </div>
+
+        <div class="card">
+            <h2>Execution History</h2>
+            <div class="filters" style="margin-bottom: 10px;">
+                <label>Filter by:</label>
+                <input type="text" id="filterDevice" placeholder="Device Name" oninput="renderHistory()">
+                <select id="filterStatus" onchange="renderHistory()">
+                    <option value="all">All Statuses</option>
+                    <option value="completed">Completed</option>
+                    <option value="failed">Failed</option>
+                    <option value="warning">Warning</option>
+                    <option value="error">Error</option>
+                    <option value="queued">Queued</option>
+                    <option value="running">Running</option>
+                </select>
+            </div>
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Task ID</th>
+                        <th>Device</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div id="pagination" style="margin-top: 10px; text-align: center;">
+                <button onclick="changePage(-1)" id="prevPage">Previous</button>
+                <span id="pageIndicator">Page 1</span>
+                <button onclick="changePage(1)" id="nextPage">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Logs -->
+    <div id="logModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Task Logs</h2>
+            <pre id="logContent"></pre>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

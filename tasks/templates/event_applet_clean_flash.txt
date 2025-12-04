@@ -1,0 +1,6 @@
+event manager applet CLEAN_FLASH
+ event none maxrun 1800
+ action 1.0 cli command "enable"
+ action 2.0 cli command "install remove inactive" pattern "\[y\/n\]"
+ action 3.0 cli command "y"
+ action 4.0 syslog msg "Flash cleared successfully."

@@ -1,0 +1,39 @@
+! Deleting existing applet InstallIOSImage
+no event manager applet InstallIOSImage
+! # EEM Applet to install IOS image from Flash
+event manager applet InstallIOSImage authorization bypass
+{% if schedule_date_time %}
+event timer cron cron-entry "{{ schedule_date_time }}" maxrun 1800
+{% else %}
+event none maxrun 1800
+{% endif %}
+action 001 syslog priority informational msg "EEM Applet InstallIOSImage started"
+action 002 cli command "enable"
+action 003 cli command "terminal length 0"
+# Verify existence of IOS file with correct size
+action 004 cli command "dir flash:{{ full_ios_filename }} | include {{ full_ios_filesize }}"
+action 005 regexp "{{ full_ios_filesize }}" "$_cli_result" match size_str
+action 006 if $_regexp_result eq 0
+action 007 syslog msg "EEM: File check failed. File install aborted."
+action 008 exit
+action 009 end
+
+# File exists and size is correct proceed with install
+action 010 syslog msg "EEM: File check passed. Proceeding with install."
+action 011 cli command "enable"
+
+action 013 syslog msg "Updating startup config..."
+action 014 cli command "configure terminal"
+action 015 cli command "no system ignore startupconfig switch all"
+action 016 cli command "no boot system"
+action 017 cli command "boot system flash:packages.conf"
+action 018 cli command "no boot manual"
+action 018 cli command "end"
+action 019 syslog msg "Running configuration saved."
+action 020 cli command "write memory"
+# begin actual installation of IOS image
+action 021 cli command "enable"
+action 022 cli command "install add file flash:{{ full_ios_filename }} activate commit" pattern "y\/n"
+action 023 cli command "y" pattern "y\/n"
+action 024 syslog msg  "Reloading device to upgrade code"
+action 025 cli command "y"

@@ -1,0 +1,9 @@
+!
+no event manager applet CopyIOSImage
+!
+event manager applet CopyIOSImage
+event none maxrun 1800
+action 1.0 syslog msg "Starting IOS image copy using HTTP..."
+action 2.0 cli command "enable"
+action 3.0 cli command "copy {{ target_ios_url }} flash:"
+action 4.0 syslog msg "IOS image copy using HTTP completed successfully."
