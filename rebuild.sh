@@ -14,9 +14,10 @@ if [ -d "data" ]; then
     rm -rf data
 fi
 
-# Rebuild and start the container
-echo "Rebuilding and starting container..."
-docker compose up -d --build
+# Rebuild with no cache and start the container
+echo "Rebuilding (no cache) and starting container..."
+docker compose build --no-cache
+docker compose up -d
 
 # Prune dangling images to keep system clean
 echo "Pruning dangling images..."
