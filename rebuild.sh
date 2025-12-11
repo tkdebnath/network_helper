@@ -18,4 +18,8 @@ fi
 echo "Rebuilding and starting container..."
 docker compose up -d --build
 
+# Prune dangling images to keep system clean
+echo "Pruning dangling images..."
+docker image prune -f
+
 echo "Done! App should be running at http://localhost:8000"
