@@ -8,10 +8,10 @@ docker compose down
 echo "Removing image network_helper:latest..."
 docker rmi network_helper:latest
 
-# Remove the database file
-if [ -f "database.db" ]; then
-    echo "Removing database.db..."
-    rm -f database.db
+# Remove the database directory
+if [ -d "data" ]; then
+    echo "Removing data directory..."
+    rm -rf data
 fi
 
 # Rebuild and start the container

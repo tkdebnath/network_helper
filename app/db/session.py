@@ -1,6 +1,11 @@
+import os
 from sqlmodel import SQLModel, create_engine, Session
 
-sqlite_file_name = "database.db"
+# Ensure data directory exists
+if not os.path.exists("data"):
+    os.makedirs("data")
+
+sqlite_file_name = "data/database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 connect_args = {"check_same_thread": False}

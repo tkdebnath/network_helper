@@ -7,7 +7,7 @@ services:
     env_file:
       - env.env
     volumes:
-      - ./database.db:/app/database.db
+      - ./data:/app/data
       - ./tasks/templates:/app/tasks/templates
       - ./app/static/prechecks:/app/app/static/prechecks
     restart: unless-stopped
