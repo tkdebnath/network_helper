@@ -52,7 +52,21 @@ async def trigger_upgrade(
     requests: List[UpgradeRequest], 
     background_tasks: BackgroundTasks, 
     session: Session = Depends(get_session)
-):
+    ):
+    """
+    Trigger firmware upgrade for a list of devices.
+    
+    Parameters (Required):
+    - ip_address: Device IP or hostname
+    - platform: Scrapli platform name (e.g., IOS-XE, IOS)
+    - operation_type: Type of operation to perform. Valid values:
+        * refresh_device: Collect device information and determine upgrade phase
+        * precheck: Execute and save specific commands (show version, running-config, mac address-table, ip protocols, ip arp)
+        * upgrade_auto: IOS Activation and Installation (creates applet, triggers installation)
+        * upgrade_manual: IOS Activation and Installation (creates applet, triggers installation)
+        * cancel_schedule: Cancel scheduled upgrade
+    """
+
     results = []
     for req in requests:
         device_name = req.device_name
@@ -174,3 +188,79 @@ def get_queue(session: Session = Depends(get_session)):
 @router.get("/history", response_model=List[ExecutionStatus])
 def get_history(session: Session = Depends(get_session)):
     return session.exec(select(ExecutionStatus).order_by(ExecutionStatus.created_at.desc())).all()
+
+from tasks.netbox_graphql import fetch_devices_from_netbox
+import asyncio
+
+class NetboxRefreshRequest(BaseModel):
+    site_name: Optional[str] = None
+    region: Optional[str] = None
+    device_model: Optional[str] = None
+
+@router.post("/netbox/refresh", dependencies=[Depends(get_api_key)])
+async def trigger_netbox_refresh(
+    request: NetboxRefreshRequest,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_session)
+):
+    """
+    Fetch devices from Netbox and trigger refresh operation for each.
+    """
+    try:
+        # Run synchronous Netbox fetch in a thread
+        devices = await asyncio.to_thread(fetch_devices_from_netbox, request.site_name, request.region, request.device_model)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+        
+    results = []
+    tasks_data = []
+    
+    for device in devices:
+        device_name = device["device_name"]
+        
+        # Check if device is already in queue or running
+        existing_op = session.exec(select(DeviceQueue).where(func.lower(DeviceQueue.device_name) == device_name.lower())).first()
+        if existing_op:
+            results.append({"device_name": device_name, "status": "skipped", "reason": "Already in queue or processing"})
+            continue
+            
+        # Add to queue
+        queue_item = DeviceQueue(device_name=device_name, operation_type="refresh_device", status="queued")
+        session.add(queue_item)
+        session.commit()
+        session.refresh(queue_item)
+        
+        # Create execution record
+        task_id = str(uuid.uuid4())
+        execution_record = ExecutionStatus(
+            task_id=task_id,
+            device_name=device_name,
+            status=TaskStatus.QUEUED
+        )
+        session.add(execution_record)
+        session.commit()
+        
+        results.append({"device_name": device_name, "task_id": task_id, "status": "triggered"})
+        
+        # Prepare request data for the task
+        # We need to map the Netbox data to what refresh_device_task expects
+        # refresh_device_task expects: device_name, ip_address, site, region (and connection params via operations.py)
+        # operations.py calls connect_to_device which needs: ip_address, platform (optional but good), device_type?
+        # UpgradeRequest has device_type. connect_to_device likely uses it or platform.
+        # Let's check connect_to_device in tasks/__connection_helpers.py to be sure what keys are needed.
+        
+        req_data = {
+            "device_name": device_name,
+            "ip_address": device["ip_address"],
+            "site": device["site"],
+            "region": device["region"],
+            "platform": device["platform"],
+            "operation_type": "refresh_device",
+        }
+        
+        tasks_data.append({"task_id": task_id, "request_data": req_data})
+        
+    if tasks_data:
+        background_tasks.add_task(run_batch_operations, tasks_data)
+        
+    return {"results": results, "total_found": len(devices), "triggered": len(tasks_data)}

@@ -15,7 +15,7 @@ async def connect_to_device(device_details: dict):
         "ios-xe": "cisco_iosxe",
     }
     # Supported platform only IOS-XE
-    platform = platform_map.get(device_details['device_type'].lower(), None)
+    platform = platform_map.get(device_details.get('platform', '').lower(), None)
 
     # Load credentials from environment variables
     username = os.getenv("DEVICE_USERNAME")
@@ -29,12 +29,9 @@ async def connect_to_device(device_details: dict):
     if not device_details['ip_address']:
         raise ValueError("Missing IP address")
     
-    if not device_details['device_type']:
-        raise ValueError("Missing device type")
-    
     if not platform:
-        raise ValueError("Unsupported device type")
-
+        raise ValueError("Unsupported platform")
+    
     # Prepare Scrapli connection parameters
     timeout = 30  # Default to 30 if None
     device_connection = {

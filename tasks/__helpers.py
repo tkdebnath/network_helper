@@ -25,7 +25,7 @@ def verify_target_model(show_version):
 
 def switch_data_new(**kwargs):
     """
-    Send device data to BlinkOps webhook for tracking and monitoring.
+    Send device data to webhook for tracking and monitoring.
     
     Args:
         **kwargs: Arbitrary keyword arguments containing device data.
@@ -36,15 +36,15 @@ def switch_data_new(**kwargs):
         None: If hostname is not provided or webhook URL is not configured.
     
     Environment Variables:
-        BLINKOPS_WEBHOOK_URL: The URL endpoint for the BlinkOps webhook.
+        WEBHOOK_URL: The URL endpoint for the BlinkOps webhook.
     """
     HEADERS = {
         "Content-Type": "application/json"
     }
     if "hostname" in kwargs.keys():
-        blinkops_webhook_url = os.getenv("BLINKOPS_WEBHOOK_URL")
-        if blinkops_webhook_url:
-            response = requests.post(url=blinkops_webhook_url, headers=HEADERS, json=kwargs, verify=False)
+        webhook_url = os.getenv("WEBHOOK_URL")
+        if webhook_url:
+            response = requests.post(url=webhook_url, headers=HEADERS, json=kwargs, verify=False)
             response.raise_for_status()
             return response
 

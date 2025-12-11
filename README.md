@@ -12,6 +12,7 @@ A robust FastAPI-based application designed to automate the management and upgra
 *   **Operations**:
     *   **Upgrade**: Download image, verify checksum/size, install, and reboot.
     *   **Refresh Device**: Collect and update device details (Model, OS, Serial, etc.).
+    *   **Netbox Integration**: Dynamically fetch devices from Netbox and trigger refresh operations.
     *   **Cancel Schedule**: Cancel pending scheduled operations on devices.
     *   **Prechecks**: Run and compare pre-upgrade checks.
 
@@ -55,6 +56,10 @@ API_KEY=your-secure-api-key-here
 
 # Concurrency
 WORKER_COUNT=10
+
+# Netbox Configuration
+NETBOX_URL=https://netbox.example.com
+NETBOX_TOKEN=your-netbox-token
 
 # IOS Image Settings
 FULL_IOS_FILENAME=cat9k_iosxe.17.12.05.SPA.bin
@@ -136,6 +141,17 @@ All **POST** requests require an API Key header:
         ]
         ```
 
+*   **POST** `/api/netbox/refresh`: Fetch devices from Netbox and trigger refresh.
+    *   **Payload**: Filter criteria (optional).
+    *   **Example**:
+        ```json
+        {
+          "site_name": "MySite",
+          "region": "AMER",
+          "device_model": "C9300"
+        }
+        ```
+
 #### Monitoring
 
 *   **GET** `/api/queue`: View currently queued and in-progress tasks.
@@ -157,6 +173,7 @@ All **POST** requests require an API Key header:
 *   `tasks/`: Network automation logic.
     *   `upgrade_task.py`: Main upgrade workflow.
     *   `refresh_device.py`: Device info collection.
+    *   `netbox_graphql.py`: Netbox integration logic.
     *   `templates/`: Jinja2 templates for EEM applets.
 *   `env.env`: Configuration file.
 
